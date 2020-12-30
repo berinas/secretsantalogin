@@ -29,9 +29,6 @@ app.get('/', function(request, response) {
 	response.sendFile(path.join(__dirname + '/login.html'));
 });
 
-app.get('/employee-homepage', function(request, response) {
-	response.sendFile(path.join(__dirname + '/employee-homepage.html'));
-});
 
 app.post('/auth', function(request, response) {
 	var email = request.body.email;
@@ -53,13 +50,13 @@ app.post('/auth', function(request, response) {
 	}
 });
 
+
 app.get('/employee-homepage', function(request, response) {
 	if (request.session.loggedin) {
-        response.send('Welcome back, ' + request.session.email + '!');
+		response.sendFile(path.join(__dirname + '/employee-homepage.html'));
 	} else {
 		response.send('Please login to view this page!');
 	}
-	response.end();
 });
 
 app.listen(3000);
