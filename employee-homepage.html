@@ -1,9 +1,22 @@
 <!DOCTYPE html>
 <html>
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" type="text/css" href="login.css" />
+		<link rel="stylesheet" type="text/css" href="employee-homepage.css" />
+
 	</head>
 	<body>
-		<div>
-			<h1>Employee homepage</h1>
+        <div class="header">
+            <img src="santa.jpg" alt="logo">
 		</div>
+		<div class="add-employee-form">
+            <form id="employee-form" class="form" autoComplete="off">
+                <label class="name-label">Enter employee name:</label>
+                <input type="text" name="name" class="name-input"/>
+                <button type="submit" class="add-btn">ADD</button>
+            </form>
+        </div>
 	</body>
+	
 </html>

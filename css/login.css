@@ -5,6 +5,7 @@ body{
     width: 300px;
     margin: 0 auto;
     font-family: Tahoma, Geneva, sans-serif;
+    margin-bottom: 2rem;
 }
 .login-form h1 {
     text-align: center;
@@ -31,7 +32,6 @@ body{
     color: #ffffff;
 }
 .header {
-    margin-top: 2rem;
     margin-bottom: 2rem;
     text-align: center;
     align-items: center;
