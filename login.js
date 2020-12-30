@@ -29,7 +29,6 @@ app.get('/', function(request, response) {
 	response.sendFile(path.join(__dirname + '/login.html'));
 });
 
-
 app.post('/auth', function(request, response) {
 	var email = request.body.email;
 	var password = request.body.password;
@@ -50,13 +49,17 @@ app.post('/auth', function(request, response) {
 	}
 });
 
-
 app.get('/employee-homepage', function(request, response) {
 	if (request.session.loggedin) {
 		response.sendFile(path.join(__dirname + '/employee-homepage.html'));
 	} else {
 		response.send('Please login to view this page!');
 	}
+});
+
+app.get('/logout', function(request, response) {
+	request.session.destroy();
+	response.redirect('/');
 });
 
 app.listen(3000);
