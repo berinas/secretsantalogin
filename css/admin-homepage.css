@@ -9,10 +9,7 @@ body{
     margin-top: 2rem;
     margin-bottom: 2rem;
 }
-.employee-list-form {
-    height: 400px;
-    overflow: scroll;
-}
+
 .form{
     text-align: center;
     margin: 0 auto;

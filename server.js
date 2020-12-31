@@ -24,6 +24,8 @@ app.use(session({
 }));
 app.use(bodyParser.urlencoded({extended : true}));
 app.use(bodyParser.json());
+app.set('engine', 'ejs');
+
 
 app.get('/', function(request, response) {
 	response.sendFile(path.join(__dirname + '/login.html'));
@@ -51,7 +53,16 @@ app.post('/auth', function(request, response) {
 
 app.get('/admin-homepage', function(request, response) {
 	if (request.session.loggedin) {
-		response.sendFile(path.join(__dirname + '/admin-homepage.html'));
+		var query = "SELECT * FROM employees";
+    	connection.query(query,function(err,result){
+        	if(err)
+            	throw err;
+       	 	else {
+				console.log(result);
+				response.render('admin-homepage.ejs', { employees: result });
+            	response.end();
+		}
+    });
 	} else {
 		response.send('Please login to view this page!');
 	}
@@ -61,5 +72,17 @@ app.get('/logout', function(request, response) {
 	request.session.destroy();
 	response.redirect('/');
 });
+
+/*app.get('/admin-homepage.html',function(req,res) {
+    var query = "SELECT * FROM employees";
+    connection.query(query,function(err,result){
+        if(err)
+            throw err;
+        else {
+            res.render('employees.ejs', { employees: result });
+            res.end();
+        }
+    });
+});*/
 
 app.listen(3000);
