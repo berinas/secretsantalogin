@@ -37,7 +37,7 @@ app.post('/auth', function(request, response) {
 			if (results.length > 0) {
 				request.session.loggedin = true;
 				request.session.email = email;
-				response.redirect('/employee-homepage');
+				response.redirect('/admin-homepage');
 			} else {
 				response.send('Incorrect Email and/or Password!');
 			}			
@@ -49,9 +49,9 @@ app.post('/auth', function(request, response) {
 	}
 });
 
-app.get('/employee-homepage', function(request, response) {
+app.get('/admin-homepage', function(request, response) {
 	if (request.session.loggedin) {
-		response.sendFile(path.join(__dirname + '/employee-homepage.html'));
+		response.sendFile(path.join(__dirname + '/admin-homepage.html'));
 	} else {
 		response.send('Please login to view this page!');
 	}
