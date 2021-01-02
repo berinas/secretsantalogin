@@ -7,15 +7,17 @@
 	</head>
 	<body>
 		<ul>
-			<li><a href="/logout">LOG OUT</a></li>
+            <li><a href="/logout">LOG OUT</a></li>
+            <li><a href="/generate">GENERATE</a></li>
+            <li><a href="/">HOME</a></li>
 		  </ul>
 		<div class="add-employee-form">
-            <form id="admin-form" class="form" autoComplete="off">
+            <form id="admin-form" class="form" autoComplete="off" action="/adduser" method="post">
                 <label class="name-label">Employee name:</label>
-				<input type="text" name="name" class="name-input"/>
+				<input type="text" name="name" class="name-input" id="name"/>
 				<br>
 				<label class="email-label">Employee email:</label>
-				<input type="text" name="email" class="email-input"/>
+				<input type="text" name="email" class="email-input" id="email"/>
 				<br>
                 <button type="submit" class="add-btn">ADD</button>
             </form>
@@ -23,18 +25,30 @@
 		<div class="employee-list-form">
             <section id="table">
                 <div class="table">
-            
-                    <div id="headers">
-                        <span id="name">Name</span>
-                        <span id="email">Email</span>
-                    </div>
-            
-                    <% for(var i = 0; i < employees.length; i++) { %>
-                            <form class="tr" action="handleForm">
-                                <input type="text" name="name" class="td" value= <%= employees[i].name %>>
-                                <input type="text" name="email" class="td" value= <%= employees[i].email %>>
-                            </form>
-                    <% } %>     
+                    <table border="0">
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email Address</th>
+                            <th>Paired employee name</th>
+                        </tr>
+                        <%
+                        if(employees.length != 0){
+                        employees.forEach(function(data){
+                        %>
+                        <tr>
+                            <td><%=data.id %></td>
+                            <td><%=data.name %></td>
+                            <td><%=data.email %></td>
+                            <td><%=data.pair %></td>
+                        </tr>
+                        <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="4">No Data Found</td>
+                            </tr>
+                        <% } %>
+                    </table>
                 </div>
             </section>
         </div>
