@@ -4,7 +4,6 @@ var session = require('express-session');
 var bodyParser = require('body-parser');
 var path = require('path');
 var nodemailer = require('nodemailer');
-const permission = require('permission');
 
 
 var connection = mysql.createPool({
@@ -13,6 +12,7 @@ var connection = mysql.createPool({
 	password : 'DJEASXHE8M',
 	database : 'UR4egJqhNC'
 });
+
 
 var mail = nodemailer.createTransport({
 	host: 'smtp.gmail.com',
@@ -92,7 +92,7 @@ app.get('/admin-homepage', function(request, response) {
 
 app.get('/employee-homepage', function(request, response) {
 	if (request.session.loggedin) {
-    	connection.query("SELECT e.paired_employee_id FROM employees e WHERE e.email = ?", [request.session.email], function(err,paired_employee){
+    	connection.query("SELECT e.name FROM employees e LEFT JOIN employees e2 ON e.id = e2.paired_employee_id WHERE e2.email = ?", [request.session.email], function(err,paired_employee){
         	if(err)
             	throw err;
        	 	else {
@@ -135,7 +135,7 @@ app.post('/adduser', function(request, response) {
 					subject: 'Welcome to secret santa',
 					text: 'Welcome ' + request.body.name + ', your password is: ' + pass
 				};
-				  
+
 				mail.sendMail(mailOptions, function(error, info){
 					if (error) {
 					  console.log(error);
