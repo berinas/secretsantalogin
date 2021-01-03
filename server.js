@@ -3,11 +3,11 @@ var express = require('express');
 var session = require('express-session');
 var bodyParser = require('body-parser');
 var path = require('path');
-var nodemailer = require('nodemailer'); //za mail
+var nodemailer = require('nodemailer');
 const permission = require('permission');
 
 
-var connection = mysql.createConnection({
+var connection = mysql.createPool({
 	host     : 'remotemysql.com',
 	user     : 'UR4egJqhNC',
 	password : 'DJEASXHE8M',
@@ -24,10 +24,9 @@ var mail = nodemailer.createTransport({
   });
 
 var app = express();
+
 app.use(express.static(__dirname + '/css'));
 app.use(express.static(__dirname + '/images'));
-
-
 app.use(session({
 	secret: 'secret',
 	resave: true,
@@ -35,6 +34,7 @@ app.use(session({
 }));
 app.use(bodyParser.urlencoded({extended : true}));
 app.use(bodyParser.json());
+
 app.set('engine', 'ejs');
 
 
@@ -46,11 +46,11 @@ app.post('/auth', function(request, response) {
 	var email = request.body.email;
 	var password = request.body.password;
 	if (email && password) {
-		connection.query('SELECT * FROM employees WHERE email = ? AND password = ?', [email, password], function(error, results, fields) {
-			if (results.length > 0) {
+		connection.query('SELECT * FROM employees WHERE email = ? AND password = ?', [email, password], function(error, users, fields) {
+			if (users.length > 0) {
 				request.session.loggedin = true;
 				request.session.email = email;
-				if (results[0].role == "Admin") {
+				if (users[0].role == "Admin") {
 					response.redirect('/admin-homepage');
 				} else {
 					response.redirect('/employee-homepage');
@@ -70,16 +70,16 @@ app.post('/auth', function(request, response) {
 app.get('/admin-homepage', function(request, response) {
 	if (request.session.loggedin) {
 		var query = "SELECT e.id as id, e.name as name, e.email as email, COALESCE(e2.name, 'NEMA PARA ZA POKLON') as pair FROM employees e LEFT JOIN employees e2 ON e.paired_employee_id = e2.id WHERE e.role <> 'Admin'"; //dodao admina kao MAIN korisnika i njega ne treba prikazivati na listi
-    	connection.query(query,function(err,result){
+    	connection.query(query,function(err,employees){
         	if(err)
             	throw err;
        	 	else {
 				connection.query("SELECT role FROM employees WHERE email = ?", [request.session.email], function(err,results){
-					if(results[0].role == "Employee") {
+					if(results[0].role !== "Admin") {
 						response.send('You do not have permission to see this page');
 					}
 					else {
-						response.render('admin-homepage.ejs', { employees: result });
+						response.render('admin-homepage.ejs', { employees: employees });
             			response.end();
 					}
 				});
@@ -92,16 +92,16 @@ app.get('/admin-homepage', function(request, response) {
 
 app.get('/employee-homepage', function(request, response) {
 	if (request.session.loggedin) {
-    	connection.query("SELECT e.paired_employee_id FROM employees e WHERE e.email = ?", [request.session.email], function(err,result){
+    	connection.query("SELECT e.paired_employee_id FROM employees e WHERE e.email = ?", [request.session.email], function(err,paired_employee){
         	if(err)
             	throw err;
        	 	else {
 				connection.query("SELECT role FROM employees WHERE email = ?", [request.session.email], function(err,results){
-					if(results[0].role == "Admin") {
+					if(results[0].role !== "Employee") {
 						response.send('You do not have permission to see this page');
 					}
 					else {
-						response.render('employee-homepage.ejs', { paired_employee: result });
+						response.render('employee-homepage.ejs', { paired_employee: paired_employee });
 						response.end();	
 					}
 				});
@@ -111,23 +111,6 @@ app.get('/employee-homepage', function(request, response) {
 		response.send('Please login to view this page!');
 	}
 });
-/*
-app.get('/employee-homepage', function(request, response) {
-	if(request.session.loggedin) {
-		connection.query("SELECT role FROM employees WHERE email = ?", [request.session.email], function(err,result){
-			if(result[0].role == "Admin") {
-				response.send('You do not have permission to see this page');
-			}
-       	 	else {
-				response.render('employee-homepage.ejs');
-            	response.end();
-			}
-		});
-	}
-	else {
-		response.send('Please login to view this page!');
-	}
-});*/
 
 app.get('/logout', function(request, response) {
 	request.session.destroy();
@@ -163,8 +146,8 @@ app.post('/adduser', function(request, response) {
 				
 				response.redirect('/admin-homepage');
             	response.end();
-		}
-    });
+			}
+    	});
 	} else {
 		response.send('Please login to view this page!');
 	}
@@ -200,9 +183,9 @@ app.get('/generate', function(request, response) {
 					if(err)
 						throw err;
 					});
-					console.log(query);
+					//console.log(query);
 				  });
-				  console.log('');
+				  //console.log('');
 
 				response.redirect('/admin-homepage');
             	response.end();
@@ -213,19 +196,6 @@ app.get('/generate', function(request, response) {
 	}
 	
 });
-/*
-function requireRole (role) {
-	
-    return function (req, res, next) {
-		console.log(req.session.user.role);
-		console.log(role);
-        if (req.session.user && req.session.user.role === role) {
-            next();
-        } else {
-            res.send(403);
-        }
-    }
-}*/
 
 //  https://github.com/jessabean/secret-santa-js/blob/master/js/app.js
 function shuffle(array) {
@@ -247,6 +217,5 @@ function shuffle(array) {
 
     return array;
 }
-
 
 app.listen(3000);

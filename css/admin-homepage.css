@@ -72,3 +72,15 @@ ul {
 .add-btn:focus, .add-btn:hover {
     outline: none;
 }
+table {
+    border-collapse: collapse;
+    width: 100%;
+} 
+th, td {
+    text-align: center;
+    padding: 8px;
+}
+th {
+    background-color: #00cccc;
+    color: white;
+}
