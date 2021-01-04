@@ -128,10 +128,9 @@ app.get('/logout', function(request, response) {
 app.post('/adduser', function(request, response) {
 	
 	if (request.session.loggedin) {
-		console.log(request.body);
 		let pass = Math.random().toString(36).substring(7);
-		
 		var hashedPassword = passwordHash.generate(pass);
+
     	connection.query('INSERT INTO employees (name, email, password, role) VALUES (?, ?, ?, ?)', [request.body.name, request.body.email, hashedPassword, request.body.roles], function(err,result){
         	if(err)
             	throw err;
@@ -162,12 +161,29 @@ app.post('/adduser', function(request, response) {
 	
 });
 
-//granicni slucaj: 2 osobe - jedna dodijeljena drugoj - ne smiju biti 2 para- pa jedna ostaje neuparena
+app.get('/deleteuser/(:id)', function(request, response) {
+	
+	if (request.session.loggedin) {
+		var id = request.params.id;
+		
+		connection.query('DELETE FROM employees WHERE id=?', [id], function(err, result, fields) {
+			if(err)
+				throw err;
+			else {
+				response.redirect('/admin-homepage');
+				response.end();
+			}
+		})
+	} else {
+		response.send('Please login to view this page!');
+	}
+	
+});
+
+//granicni slucaj: 1 osoba i 2 osobe - jedna dodijeljena drugoj - ne smiju biti 2 para- pa jedna ostaje neuparena
 app.get('/generate', function(request, response) {
 	
 	if (request.session.loggedin) {
-
-		
 		var query = "SELECT * FROM employees WHERE role <> 'Admin'";
     	connection.query(query,function(err,result){
         	if(err)
@@ -177,7 +193,6 @@ app.get('/generate', function(request, response) {
 				result.forEach( (row) => {
 					employees_id.push(row.id);
 				  });
-
 				  
 				shuffle(employees_id);
 
@@ -191,9 +206,7 @@ app.get('/generate', function(request, response) {
 					if(err)
 						throw err;
 					});
-					//console.log(query);
 				  });
-				  //console.log('');
 
 				response.redirect('/admin-homepage');
             	response.end();

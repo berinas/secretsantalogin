@@ -42,6 +42,7 @@
                             <th>Name</th>
                             <th>Email address</th>
                             <th>Paired employee name</th>
+                            <th>Action</th>
                         </tr>
                         <%
                         if(employees.length != 0){
@@ -52,6 +53,7 @@
                             <td><%=data.name %></td>
                             <td><%=data.email %></td>
                             <td><%=data.pair %></td>
+                            <td><a href="/deleteuser/<%= data.id %>" method="get">DELETE</a></td>
                         </tr>
                         <% }) %>
                         <% } else { %>
