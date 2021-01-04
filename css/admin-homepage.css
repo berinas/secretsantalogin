@@ -37,13 +37,13 @@ ul {
   li a:hover {
     background-color: #111;
   }
-.name-label, .email-label {
+.name-label, .email-label, .roles-label {
     margin: 1rem;
     font-size: 1.05rem;
     font-weight: bold;
     color: grey;
 }
-.name-input, .email-input {
+.name-input, .email-input, .roles {
     height: 2rem;
     outline-width: 0.5px;
     padding: 1px 5px;
@@ -51,7 +51,10 @@ ul {
     font-size: 1rem;
     margin-top: 1rem;
 }
-.name-input:focus, .email-input:focus {
+.roles {
+    margin-top: 1rem;
+}
+.name-input:focus, .email-input:focus, .roles:focus {
     outline: none;
 }
 .add-btn {

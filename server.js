@@ -5,14 +5,12 @@ var bodyParser = require('body-parser');
 var path = require('path');
 var nodemailer = require('nodemailer');
 
-
 var connection = mysql.createPool({
 	host     : 'remotemysql.com',
 	user     : 'UR4egJqhNC',
 	password : 'DJEASXHE8M',
 	database : 'UR4egJqhNC'
 });
-
 
 var mail = nodemailer.createTransport({
 	host: 'smtp.gmail.com',
@@ -36,7 +34,6 @@ app.use(bodyParser.urlencoded({extended : true}));
 app.use(bodyParser.json());
 
 app.set('engine', 'ejs');
-
 
 app.get('/', function(request, response) {
 	response.sendFile(path.join(__dirname + '/login.html'));
@@ -69,7 +66,7 @@ app.post('/auth', function(request, response) {
 
 app.get('/admin-homepage', function(request, response) {
 	if (request.session.loggedin) {
-		var query = "SELECT e.id as id, e.name as name, e.email as email, COALESCE(e2.name, 'NEMA PARA ZA POKLON') as pair FROM employees e LEFT JOIN employees e2 ON e.paired_employee_id = e2.id WHERE e.role <> 'Admin'"; //dodao admina kao MAIN korisnika i njega ne treba prikazivati na listi
+		var query = "SELECT e.id as id, e.name as name, e.email as email, COALESCE(e2.name, 'no paired employee') as pair FROM employees e LEFT JOIN employees e2 ON e.paired_employee_id = e2.id WHERE e.role <> 'Admin'"; //dodao admina kao MAIN korisnika i njega ne treba prikazivati na listi
     	connection.query(query,function(err,employees){
         	if(err)
             	throw err;
@@ -123,11 +120,10 @@ app.post('/adduser', function(request, response) {
 		console.log(request.body);
 		let pass = Math.random().toString(36).substring(7);
 		
-    	connection.query('INSERT INTO employees (name, email, password, role) VALUES (?, ?, ?, ?)', [request.body.name, request.body.email, pass, "Employee"], function(err,result){
+    	connection.query('INSERT INTO employees (name, email, password, role) VALUES (?, ?, ?, ?)', [request.body.name, request.body.email, pass, request.body.roles], function(err,result){
         	if(err)
             	throw err;
        	 	else {
-				console.log(result);
 				
 				var mailOptions = {
 					from: 'cyclone.logs@gmail.com',
