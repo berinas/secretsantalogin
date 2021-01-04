@@ -90,15 +90,20 @@ app.get('/admin-homepage', function(request, response) {
 app.get('/employee-homepage', function(request, response) {
 	if (request.session.loggedin) {
     	connection.query("SELECT e.name FROM employees e LEFT JOIN employees e2 ON e.id = e2.paired_employee_id WHERE e2.email = ?", [request.session.email], function(err,paired_employee){
-        	if(err)
-            	throw err;
+        	if(err) {
+					throw err;
+			}
        	 	else {
 				connection.query("SELECT role FROM employees WHERE email = ?", [request.session.email], function(err,results){
 					if(results[0].role !== "Employee") {
 						response.send('You do not have permission to see this page');
 					}
 					else {
-						response.render('employee-homepage.ejs', { paired_employee: paired_employee });
+							if (typeof paired_employee[0] == "undefined")
+								response.render('employee-homepage.ejs', { paired_employee: "You do not have paired employee" });
+							else {
+								response.render('employee-homepage.ejs', { paired_employee: paired_employee[0].name });
+							}
 						response.end();	
 					}
 				});
