@@ -4,6 +4,7 @@ var session = require('express-session');
 var bodyParser = require('body-parser');
 var path = require('path');
 var nodemailer = require('nodemailer');
+var passwordHash = require('password-hash');
 
 var connection = mysql.createPool({
 	host     : 'remotemysql.com',
@@ -43,14 +44,19 @@ app.post('/auth', function(request, response) {
 	var email = request.body.email;
 	var password = request.body.password;
 	if (email && password) {
-		connection.query('SELECT * FROM employees WHERE email = ? AND password = ?', [email, password], function(error, users, fields) {
+		connection.query('SELECT * FROM employees WHERE email = ?', [email], function(error, users, fields) {
 			if (users.length > 0) {
-				request.session.loggedin = true;
-				request.session.email = email;
-				if (users[0].role == "Admin") {
-					response.redirect('/admin-homepage');
+				var hashedPassword = users[0].password;
+				if (passwordHash.verify(password, hashedPassword)) {
+					request.session.loggedin = true;
+					request.session.email = email;
+					if (users[0].role == "Admin") {
+						response.redirect('/admin-homepage');
+					} else {
+						response.redirect('/employee-homepage');
+					}
 				} else {
-					response.redirect('/employee-homepage');
+					response.send('Incorrect Password!');
 				}
 			} else {
 				response.send('Incorrect Email and/or Password!');
@@ -125,7 +131,8 @@ app.post('/adduser', function(request, response) {
 		console.log(request.body);
 		let pass = Math.random().toString(36).substring(7);
 		
-    	connection.query('INSERT INTO employees (name, email, password, role) VALUES (?, ?, ?, ?)', [request.body.name, request.body.email, pass, request.body.roles], function(err,result){
+		var hashedPassword = passwordHash.generate(pass);
+    	connection.query('INSERT INTO employees (name, email, password, role) VALUES (?, ?, ?, ?)', [request.body.name, request.body.email, hashedPassword, request.body.roles], function(err,result){
         	if(err)
             	throw err;
        	 	else {
