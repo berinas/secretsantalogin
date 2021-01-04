@@ -66,7 +66,7 @@ app.post('/auth', function(request, response) {
 
 app.get('/admin-homepage', function(request, response) {
 	if (request.session.loggedin) {
-		var query = "SELECT e.id as id, e.name as name, e.email as email, COALESCE(e2.name, 'no paired employee') as pair FROM employees e LEFT JOIN employees e2 ON e.paired_employee_id = e2.id WHERE e.role <> 'Admin'"; //dodao admina kao MAIN korisnika i njega ne treba prikazivati na listi
+		var query = "SELECT e.id as id, e.name as name, e.email as email, COALESCE(e2.name, 'no paired employee') as pair FROM employees e LEFT JOIN employees e2 ON e.paired_employee_id = e2.id WHERE e.role <> 'Admin'";
     	connection.query(query,function(err,employees){
         	if(err)
             	throw err;

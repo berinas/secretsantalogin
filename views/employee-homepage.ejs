@@ -2,14 +2,22 @@
 <html>
 	<head>
 		<meta charset="utf-8">
+		<link rel="stylesheet" type="text/css" href="login.css" />
 		<link rel="stylesheet" type="text/css" href="employee-homepage.css" />
-
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 	</head>
 	<body>
 		<ul>
             <li><a href="/logout">LOG OUT</a></li>
 		  </ul>
-          <h1>You should buy present to: <%=paired_employee[0].name%></h1>
+		  <div class="header">
+            <img src="santa.jpg" alt="logo">
+            <h1 class="animate__animated animate__swing">Welcome Employee</h1>
+            <h3>“The secret of living is giving!”</h3>
+		</div>
+		<div class="info">
+			<p>You should buy present to: <span style="color: #00cccc; font-weight: bold;"><%=paired_employee[0].name%></span></p>
+		</div>
 	</body>
 	
 </html>

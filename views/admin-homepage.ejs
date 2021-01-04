@@ -1,15 +1,21 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<meta charset="utf-8">
-		<link rel="stylesheet" type="text/css" href="admin-homepage.css" />
-
+        <meta charset="utf-8">
+        <link rel="stylesheet" type="text/css" href="login.css" />
+        <link rel="stylesheet" type="text/css" href="admin-homepage.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 	</head>
 	<body>
 		<ul>
             <li><a href="/logout">LOG OUT</a></li>
-            <li><a href="/generate">GENERATE</a></li>
-		  </ul>
+            <li><a href="/generate" class="generate-btn">GENERATE</a></li>
+        </ul>
+        <div class="header">
+            <img src="santa.jpg" alt="logo">
+            <h1 class="animate__animated animate__swing">Welcome Admin</h1>
+            <h3>Happy New Year!</h3>
+        </div>
 		<div class="add-employee-form">
             <form id="admin-form" class="form" autoComplete="off" action="/adduser" method="post">
                 <label class="name-label">Employee name:</label>
