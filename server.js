@@ -5,6 +5,7 @@ var bodyParser = require("body-parser");
 var path = require("path");
 var nodemailer = require("nodemailer");
 var passwordHash = require("password-hash");
+var validator = require("email-validator");
 
 var connection = mysql.createPool({
   host: "remotemysql.com",
@@ -45,12 +46,17 @@ app.get("/", function (request, response) {
 app.post("/auth", function (request, response) {
   var email = request.body.email;
   var password = request.body.password;
-  if (email && password) {
+
+  if (!validator.validate(email)) {
+    response.send("Invalid email");
+    response.end();
+  } else if (email && password) {
     connection.query(
       "SELECT * FROM employees WHERE email = ?",
       [email],
       function (error, users, fields) {
-        if (users.length > 0) {
+        if (error) throw err;
+        else if (users.length > 0) {
           var hashedPassword = users[0].password;
           if (passwordHash.verify(password, hashedPassword)) {
             request.session.loggedin = true;
@@ -86,7 +92,8 @@ app.get("/admin-homepage", function (request, response) {
           "SELECT role FROM employees WHERE email = ?",
           [request.session.email],
           function (err, results) {
-            if (results[0].role !== "Admin") {
+            if (err) throw err;
+            else if (results[0].role !== "Admin") {
               response.send("You do not have permission to see this page");
             } else {
               response.render("admin-homepage.ejs", { employees: employees });
@@ -114,7 +121,8 @@ app.get("/employee-homepage", function (request, response) {
             "SELECT role FROM employees WHERE email = ?",
             [request.session.email],
             function (err, results) {
-              if (results[0].role !== "Employee") {
+              if (err) throw err;
+              else if (results[0].role !== "Employee") {
                 response.send("You do not have permission to see this page");
               } else {
                 if (typeof paired_employee[0] == "undefined")
@@ -205,7 +213,6 @@ app.get("/deleteuser/(:id)", function (request, response) {
   }
 });
 
-//granicni slucaj: 1 osoba i 2 osobe - jedna dodijeljena drugoj - ne smiju biti 2 para- pa jedna ostaje neuparena
 app.get("/generate", function (request, response) {
   if (request.session.loggedin) {
     var query = "SELECT * FROM employees WHERE role <> 'Admin'";
@@ -216,29 +223,38 @@ app.get("/generate", function (request, response) {
         result.forEach((row) => {
           employees_id.push(row.id);
         });
+        if (employees_id.length == 2) {
+          connection.query(
+            "UPDATE employees SET paired_employee_id = ? WHERE id = ?",
+            [employees_id[1], employees_id[0]],
+            function (err, result) {
+              if (err) throw err;
+            }
+          );
+        } else if (employees_id.length > 1) {
+          shuffle(employees_id);
 
-        shuffle(employees_id);
+          employees_id.forEach(function (item, index, array) {
+            if (index + 1 < employees_id.length)
+              var query =
+                "UPDATE employees SET paired_employee_id = '" +
+                employees_id[index + 1] +
+                "' WHERE id = '" +
+                item +
+                "'";
+            else
+              var query =
+                "UPDATE employees SET paired_employee_id = '" +
+                employees_id[0] +
+                "' WHERE id = '" +
+                item +
+                "'";
 
-        employees_id.forEach(function (item, index, array) {
-          if (index + 1 < employees_id.length)
-            var query =
-              "UPDATE employees SET paired_employee_id = '" +
-              employees_id[index + 1] +
-              "' WHERE id = '" +
-              item +
-              "'";
-          else
-            var query =
-              "UPDATE employees SET paired_employee_id = '" +
-              employees_id[0] +
-              "' WHERE id = '" +
-              item +
-              "'";
-
-          connection.query(query, function (err, result) {
-            if (err) throw err;
+            connection.query(query, function (err, result) {
+              if (err) throw err;
+            });
           });
-        });
+        }
 
         response.redirect("/admin-homepage");
         response.end();
@@ -249,7 +265,6 @@ app.get("/generate", function (request, response) {
   }
 });
 
-//  https://github.com/jessabean/secret-santa-js/blob/master/js/app.js
 function shuffle(array) {
   let counter = array.length;
 
