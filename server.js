@@ -155,39 +155,43 @@ app.post("/adduser", function (request, response) {
   if (request.session.loggedin) {
     let pass = Math.random().toString(36).substring(7);
     var hashedPassword = passwordHash.generate(pass);
+    if (!validator.validate(request.body.email)) {
+      response.send("Invalid email");
+      response.end();
+    } else {
+      connection.query(
+        "INSERT INTO employees (name, email, password, role) VALUES (?, ?, ?, ?)",
+        [
+          request.body.name,
+          request.body.email,
+          hashedPassword,
+          request.body.roles,
+        ],
+        function (err, result) {
+          if (err) throw err;
+          else {
+            var mailOptions = {
+              from: "cyclone.logs@gmail.com",
+              to: request.body.email,
+              subject: "Welcome to secret santa",
+              text:
+                "Welcome " + request.body.name + ", your password is: " + pass,
+            };
 
-    connection.query(
-      "INSERT INTO employees (name, email, password, role) VALUES (?, ?, ?, ?)",
-      [
-        request.body.name,
-        request.body.email,
-        hashedPassword,
-        request.body.roles,
-      ],
-      function (err, result) {
-        if (err) throw err;
-        else {
-          var mailOptions = {
-            from: "cyclone.logs@gmail.com",
-            to: request.body.email,
-            subject: "Welcome to secret santa",
-            text:
-              "Welcome " + request.body.name + ", your password is: " + pass,
-          };
+            mail.sendMail(mailOptions, function (error, info) {
+              if (error) {
+                console.log(error);
+              } else {
+                console.log("Email sent: " + info.response);
+              }
+            });
 
-          mail.sendMail(mailOptions, function (error, info) {
-            if (error) {
-              console.log(error);
-            } else {
-              console.log("Email sent: " + info.response);
-            }
-          });
-
-          response.redirect("/admin-homepage");
-          response.end();
+            response.redirect("/admin-homepage");
+            response.end();
+          }
         }
-      }
-    );
+      );
+    }
   } else {
     response.send("Please login to view this page!");
   }
